@@ -1,0 +1,25 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "ProcessingSetup",
+            "request": "launch",
+            "mainClass": "setup.ProcessingSetup",
+            "projectName": "mssn_f5f128c7"
+        },
+        {
+            "type": "java",
+            "name": "Hello",
+            "request": "launch",
+            "mainClass": "Hello",
+            "projectName": "mssn_f5f128c7"
+        },
+        {
+            "type": "java",
+            "name": "Correr simulação",
+            "request": "launch",
+            "mainClass": "ProcessingSetup"
+        }
+    ]
+}

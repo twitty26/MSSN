@@ -1,0 +1,19 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "compilar",
+            "type": "shell",
+            "command": "javac",
+            "args": 
+            [
+                "-encoding", "UTF-8",
+                "-cp", "lib/core-4.5.6.jar;src",
+                "-d", "bin",
+                "src/*.java"
+            ],
+            "group": { "kind": "build", "isDefault": true },
+            "problemMatcher": []
+        }
+    ]
+}
