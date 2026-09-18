@@ -6,6 +6,13 @@
             "name": "ProcessingSetup",
             "request": "launch",
             "mainClass": "setup.ProcessingSetup",
+            "projectName": "MSSN_80bc448b"
+        },
+        {
+            "type": "java",
+            "name": "ProcessingSetup",
+            "request": "launch",
+            "mainClass": "setup.ProcessingSetup",
             "projectName": "mssn_f5f128c7"
         },
         {
