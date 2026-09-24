@@ -16,13 +16,9 @@ public class Hello2 implements IProcessingApp {
 
     @Override
     public void mousePressed(PApplet p) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'mousePressed'");
     }
 
     @Override
     public void keyPressed(PApplet p) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'keyPressed'");
     }
 }

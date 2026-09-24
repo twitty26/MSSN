@@ -1,0 +1,106 @@
+INFORMAÇÃO SOBRE A PASTA "mssn" (Modelação e Simulação de Sistemas Naturais)
+Última atualização: 2026-09-20 (TP0/java preenchido; Logo e Face feitos)
+
+Ler também: claude/regras/regras.txt (regras a cumprir sempre) e CLAUDE.md (raiz).
+
+=====================================================================
+1. ESTRUTURA GERAL
+=====================================================================
+mssn/                              <- pasta aberta no VS Code (workspace)
+├── CLAUDE.md                      -> na raiz (o utilizador moveu-o e voltou a pô-lo aqui); manda ler
+│                                     claude/regras/regras.txt e claude/info_mssn.txt. Só é lido
+│                                     automaticamente na raiz (ou em .claude/).
+├── data/                          -> vazia; criada conforme o guia de Setup (loadImage() procura aqui)
+├── .vscode/                       -> alinhado com o guia de Setup
+│   ├── launch.json                -> 1 config "Correr simulação", mainClass setup.ProcessingSetup
+│   ├── settings.json              -> sourcePaths=["src"], referencedLibraries=["lib/core-4.5.6.jar"], outputPath=bin
+│   └── tasks.json                 -> task "compilar" (PowerShell, recursivo: Get-ChildItem src -Recurse)
+├── bin/                           -> .class de src/ (versionado no git; VS Code compila para aqui)
+├── lib/core-4.5.6.jar             -> biblioteca Processing core
+├── src/                           -> código dos exercícios da UC (só se trabalha aqui, no TP0 e em claude/)
+│   ├── setup/IProcessingApp.java  -> interface "contrato" (setup, draw, mousePressed, keyPressed)
+│   ├── setup/ProcessingSetup.java -> extends PApplet; settings() com size(800,600) e smooth(8);
+│   │                                 main(): app = new Face() ativo; Logo comentado (com o import comentado)
+│   ├── semana1_2/Hello.java, Hello2.java -> exemplos (círculo que segue o rato); Hello2 sem throw nos handlers
+│   ├── tp0/logo/Logo.java         -> TP0 pontos 1a-1d (ver secção 3)
+│   ├── tp0/face/Face.java         -> TP0 pontos 2 e 2a (ver secção 3)
+│   ├── ca/ForestFireApp.java      -> esqueleto por implementar (UnsupportedOperationException)
+│   └── aa/ ca/ dynamics/ ecosystem/ physics/ tools/ *.txt -> ficheiros vazios (notas por escrever)
+├── claude/
+│   ├── info_mssn.txt              -> este ficheiro
+│   └── regras/regras.txt          -> regras genéricas (G1-G7) e específicas (E1-E5)
+└── TP0_A50738_A52708/             -> Trabalho Prático 0 (A50738 e A52708), untracked
+    ├── doc/                       -> vazia (relatório por fazer)
+    ├── java/                      -> cópia de entrega: setup/ (IProcessingApp, ProcessingSetup) e
+    │                                 tp0/ (logo/Logo, face/Face); idêntica a src/setup + src/tp0
+    └── mod/                       -> vazia (modelos de suporte por fazer)
+
+=====================================================================
+2. PADRÃO ARQUITETURAL
+=====================================================================
+- Processing (core-4.5.6.jar) para simulações gráficas em Java.
+- Só uma classe estende PApplet (ProcessingSetup); cada simulação implementa IProcessingApp e
+  recebe o PApplet por parâmetro. Para trocar de simulação, comentar/descomentar linhas
+  app = new ...() em ProcessingSetup.main() (e o import correspondente).
+- O tempo é medido com dt em segundos (nunca por frames).
+
+=====================================================================
+3. TP0 (Projeto 0) - só Parte B feita
+=====================================================================
+Decisões:
+- Código de trabalho em src/tp0/ (pacote tp0); TP0/java é a cópia de entrega (src/setup + src/tp0),
+  feita só no fim e nunca editada à mão (se mudar algo, alterar em src/ e voltar a copiar).
+- Parte A (diagramas de ciclos causais), doc/ e mod/ ficam para depois.
+- O jar não vai no zip de entrega. O zip leva só doc/, java/ e mod/.
+
+Implementado:
+- Logo.java: uma classe com 3 versões de draw(p, dt), só uma ativa de cada vez:
+  1b (ativa) logo novo de 2 em 2 s em posição aleatória; 1c (comentada) nasce na origem e desliza
+  com easing exponencial; 1d (comentada) o clique do rato define o destino. Logo VW desenhado com
+  triângulos e polígonos pretos + anel (formas extraídas da imagem de referência). O utilizador
+  já testou as variantes.
+- Face.java (2 e 2a): cara de elipse verde; cada pupila segue o rato (PVector.limit); rato perto
+  da cara -> surpreendida (boca aberta, sobrancelhas levantadas), longe -> sorriso.
+- ProcessingSetup: smooth(8) e app = new Face() ativo.
+
+Por fazer / em aberto:
+- Ponto 2b: o texto do enunciado perdeu-se (só aparece "b." ao lado da última linha de faces);
+  não presumir nada até haver o original.
+- Parte A, relatório em doc/ e modelos em mod/.
+- Escolher que app fica ativa no ProcessingSetup antes da entrega e voltar a copiar.
+
+Histórico do problema de classpath (resolvido):
+- Ficheiros de TP0/java davam "not on the classpath" / "non-project file" porque o VS Code aberto
+  em mssn só lê mssn/.vscode. A tentativa com .project/.classpath (projeto Eclipse aninhado)
+  falhou (ficheiros foram parar a TP0/mod/) e foi abandonada. Solução: desenvolver em src/tp0/ e
+  copiar para TP0/java só na entrega.
+
+=====================================================================
+4. VERIFICAÇÃO CONTRA O GUIA "Setup - Java, Processing e VSCode"
+=====================================================================
+- Conforme: jar core-4.5.6.jar, JDK 25 (>=17), settings.json, pacotes em src/ (setup, tools,
+  dynamics, physics, ca, aa, ecosystem + semana1_2 e tp0 extra).
+- Corrigido: taska.json -> tasks.json (VS Code só lê tasks.json) e compilação recursiva (o
+  guia usa src/*.java, que falha com pacotes); launch.json reduzido à config do guia com
+  setup.ProcessingSetup; Hello2 sem exceções nos handlers; criada data/.
+- Pastas de src/ não se removem (foram criadas de propósito para as semanas seguintes).
+- Nota: o guia diz que bin/ é gerado e "não se mexe"; aqui está versionado no git.
+- Nota: ForestFireApp ainda é esqueleto (lança exceção no setup); não o usar em main() até implementar.
+- Verificado (2026-09-20): src/ completo e TP0/java (sozinho) compilam sem erros nem avisos.
+
+=====================================================================
+5. ESTADO DO GIT (branch Tiago)
+=====================================================================
+- Modificados: .vscode/launch.json, src/semana1_2/Hello2.java, src/setup/ProcessingSetup.java,
+  bin/semana1_2/Hello2.class, bin/setup/ProcessingSetup.class; .vscode/taska.json removido.
+- Untracked: .vscode/tasks.json, CLAUDE.md, claude/, src/tp0/, bin/tp0/, TP0_A50738_A52708/
+- doc/, mod/ e data/ estão vazias, por isso o git não as mostra.
+- Nada commitado por mim: os commits são sempre feitos pelo utilizador (regra G4).
+
+=====================================================================
+6. NOTAS ÚTEIS
+=====================================================================
+- Estrutura de entrega dos professores: doc / java / mod (ver regras E2).
+- Temas por semana: semana1_2 introdução; dynamics 3-5; ca 6-7; aa 8-9; ecosystem 10-13;
+  physics/tools transversais.
+- Atualizar este ficheiro sempre que houver alterações relevantes ou decisões (regras E1, G6).
