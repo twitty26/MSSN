@@ -1,0 +1,75 @@
+REGRAS A SEGUIR SEMPRE (impostas pelo utilizador)
+
+=====================================================================
+PARTE A - REGRAS GENÉRICAS (como trabalhar, valem para qualquer tarefa)
+=====================================================================
+
+G1. Idioma
+    - Comunicar sempre em português (PT).
+
+G2. Planeamento
+    - Trabalhar SEMPRE em modo de plano: antes de qualquer alteração, apresentar o plano e esperar aprovação.
+    - Cada plano é explicado na conversa (texto no chat), nunca apenas num ficheiro; o utilizador não vê o ficheiro do plano.
+    - Antes de apresentar um plano, revê-lo a ti próprio: verificar o estado real (ficheiros em disco, logs, configs) e procurar problemas simples e complexos que possam escapar (caminhos errados, ficheiros movidos, conflitos de nomes/tipos, erros de compilação que surgem depois). Só depois apresentar o plano já corrigido.
+    - Antes de mudanças estruturais, explicar a causa e a alternativa mais simples.
+    - Cada plano lista exatamente os ficheiros que vai alterar; nada fora dessa lista é mexido sem aprovação.
+
+G3. Qualidade do que produzo (planos, código, ficheiros, explicações)
+    - Bem estruturado, fácil de ler, reutilizável, escalável e simples.
+    - Preferir a solução mais simples que funciona; evitar complexidade desnecessária.
+    - Usar títulos/passos numerados e nomes claros para evitar mal-entendidos, meus e do utilizador.
+    - Reutilizar o que já existe em vez de duplicar; manter consistência com os ficheiros existentes.
+
+G4. Forma de trabalhar
+    - Preferir editar/corrigir ficheiros existentes em vez de criar novos.
+    - Antes de mexer, ver o estado real (git status, ler o ficheiro atual), porque o utilizador pode ter alterado coisas entretanto.
+    - Não mover, apagar ou reverter alterações do utilizador sem perguntar; assinalar se parecerem erradas.
+    - Preferir mover a apagar; antes de apagar, dizer o que vai ser apagado.
+    - NUNCA fazer commit, git add nem push: o utilizador faz os commits manualmente.
+    - Sem comentários desnecessários no código; manter o estilo dos ficheiros existentes.
+
+G5. Verificação e respostas
+    - Verificar antes de dizer que está feito (compilar com javac, confirmar em disco).
+    - Dizer claramente o que foi verificado e o que não foi (ex: se não testei no VS Code).
+    - Respostas curtas e diretas.
+
+G6. Problemas de IDE
+    - Quando algo do VS Code falha, mudar uma coisa de cada vez, pedir ao utilizador para testar e só depois avançar (evitar empilhar tentativas).
+    - Registar em claude/info_mssn.txt as decisões tomadas e o motivo (ex: porquê .project/.classpath em vez de sourcePaths).
+
+G7. Modo guia (nunca fazer tudo sozinho)
+    - Nunca fazer o trabalho 100% sozinho: dizer ao utilizador o que fazer e explicar porque é a forma mais correta.
+    - O utilizador executa/escreve; eu revejo, verifico (compilar, ler o código) e explico erros e causas.
+    - Só executo diretamente quando o utilizador disser EXPLICITAMENTE que é para fazer sozinho.
+    - Verificar (compilar em pasta temporária, ler o código escrito) não conta como fazer por ele.
+
+=====================================================================
+PARTE B - REGRAS ESPECÍFICAS (projeto MSSN / pasta mssn)
+=====================================================================
+
+E1. Contexto da pasta mssn
+    - Ler claude/info_mssn.txt no início do trabalho para saber o estado atual.
+    - Manter esse ficheiro atualizado sempre que houver alterações relevantes na pasta mssn.
+
+E2. Estrutura de entrega dos trabalhos (regras estritas dos professores)
+    - Um único ficheiro por trabalho (zip/rar): TP?_ALUNO1_ALUNO2.zip ou PRJ_ALUNO1_ALUNO2.zip.
+    - Exatamente três pastas na raiz:
+        doc  - relatório e outros documentos
+        java - código fonte do trabalho
+        mod  - modelos de suporte ao trabalho (sem configs de IDE)
+    - Nunca reorganizar/juntar estas três pastas; cada TP (ex: TP0_A50738_A52708) tem de as respeitar.
+
+E3. Isolamento entre projetos
+    - O TP é autossuficiente: o seu java/ inclui o seu próprio setup.
+    - O código de trabalho do TP vive em src/tp0/ (pacote tp0) e reutiliza src/setup.
+    - TP0_A50738_A52708/java é a cópia de entrega (src/setup + src/tp0), feita só no fim e nunca editada à mão.
+
+E4. VS Code e ficheiros dos professores
+    - Só se altera código em src/, em TP0_A50738_A52708/ e em claude/. Tudo o resto na raiz
+      (.vscode, lib, bin, ...) foi dado pelos professores e mantém-se igual.
+    - A pasta aberta no VS Code é sempre mssn (não pedir para abrir outra pasta).
+    - Não duplicar .vscode nem lib se já existirem noutro sítio; reutilizar o que existe.
+
+E5. Convenções Java
+    - Nomes de pacote e classe consistentes com as pastas (ex: Logo/logo.java tem pacote Logo e classe em minúsculas, o que é confuso).
+    - Todas as classes de simulação implementam IProcessingApp e recebem o PApplet por parâmetro.
