@@ -1,13 +1,12 @@
 package tp1.joga_da_vida;
 
-import java.util.Arrays;
-
 import processing.core.PApplet;
 
 /*
  * Grelha de células que ocupa a janela toda.
  * Vizinhança de Moore (8 vizinhas) e bordas ligadas: o que sai de um lado entra pelo outro.
- * A regra é dada no formato "sobrevive/nasce", por exemplo "23/3" (clássico) ou "23/36".
+ * Regra clássica do Jogo da Vida (23/3): uma célula viva sobrevive com 2 ou 3 vizinhas vivas,
+ * uma célula morta nasce com exatamente 3 vizinhas vivas.
  */
 public class CellularAutomata {
 
@@ -17,11 +16,8 @@ public class CellularAutomata {
     private final float cellHeight;
     private final int[] palette;
     private final Cell[][] cells;
-    private final boolean[] survive = new boolean[9];
-    private final boolean[] birth = new boolean[9];
-    private String rule;
 
-    public CellularAutomata(PApplet p, int nrows, int ncols, String rule, int[] palette) {
+    public CellularAutomata(PApplet p, int nrows, int ncols, int[] palette) {
         this.nrows = nrows;
         this.ncols = ncols;
         this.palette = palette;
@@ -34,7 +30,6 @@ public class CellularAutomata {
             }
         }
         setMooreNeighbors();
-        setRule(rule);
     }
 
     private void setMooreNeighbors() {
@@ -54,20 +49,6 @@ public class CellularAutomata {
                 }
                 cells[i][j].setNeighbors(neighbors);
             }
-        }
-    }
-
-    public void setRule(String rule) {
-        this.rule = rule;
-        String[] parts = rule.split("/");
-        fill(survive, parts[0]);
-        fill(birth, parts[1]);
-    }
-
-    private void fill(boolean[] table, String digits) {
-        Arrays.fill(table, false);
-        for (char c : digits.toCharArray()) {
-            table[c - '0'] = true;
         }
     }
 
@@ -96,8 +77,8 @@ public class CellularAutomata {
             for (Cell c : row) {
                 int n = c.countAliveNeighbors();
                 if (c.isAlive()) {
-                    c.setNext(survive[n], c.getColorIndex());
-                } else if (birth[n]) {
+                    c.setNext(n == 2 || n == 3, c.getColorIndex());
+                } else if (n == 3) {
                     c.setNext(true, c.dominantNeighborColor(p, palette.length));
                 } else {
                     c.setNext(false, c.getColorIndex());
@@ -154,9 +135,5 @@ public class CellularAutomata {
 
     public float getCellWidth() {
         return cellWidth;
-    }
-
-    public String getRule() {
-        return rule;
     }
 }
