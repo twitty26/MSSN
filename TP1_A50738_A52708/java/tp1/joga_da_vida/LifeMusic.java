@@ -13,20 +13,19 @@ import javax.sound.midi.Synthesizer;
  *
  * Melodia: cada linha da grelha é uma nota da escala pentatónica de dó (3 oitavas, de cima
  * para baixo do agudo para o grave) e cada cor é um instrumento no seu próprio canal.
- * Para não virar ruído, cada coluna toca no máximo MAX_NOTES notas.
  *
- * Acompanhamento: a cada geração muda o acorde de fundo (dó, lá, fá, sol), tocado por um pad.
+ * Acompanhamento: a cada passagem do cursor muda o acorde de fundo (dó, lá, fá, sol), tocado por um pad.
  * Todos os canais têm reverberação para o som ficar mais suave.
  */
 public class LifeMusic {
 
     private static final int[] PENTATONIC = { 0, 2, 4, 7, 9 };
-    private static final int[] INSTRUMENTS = { 11, 12, 46, 8 }; // vibrafone, marimba, harpa, celesta
+    private static final int[] INSTRUMENTS = { 11, 12, 46, 8, 10 }; // vibrafone, marimba, harpa, celesta, caixa de música
     private static final int MELODY_BASE = 60; // dó 4
     private static final int OCTAVES = 3;
     private static final int MAX_NOTES = 4;
 
-    private static final int PAD_CHANNEL = 4;
+    private static final int PAD_CHANNEL = 8; // o canal 9 é a bateria, por isso não se usa
     private static final int PAD_INSTRUMENT = 89; // pad "warm"
     private static final int[] CHORD_ROOTS = { 48, 45, 41, 43 }; // dó, lá, fá, sol
     private static final int[][] CHORD_SHAPES = { { 0, 7, 16 }, { 0, 7, 15 }, { 0, 7, 16 }, { 0, 7, 16 } };
@@ -57,29 +56,39 @@ public class LifeMusic {
     }
 
     /*
-     * Toca as células vivas de uma coluna. As notas da coluna anterior são largadas aqui,
-     * por isso cada nota dura exatamente um passo do cursor (som ligado, sem cortes secos).
+     * Toca as células vivas de uma faixa de colunas [colStart, colEnd[.
+     * Cada linha com células vivas é uma nota candidata; tocam no máximo MAX_NOTES, espalhadas
+     * do agudo ao grave, e cada uma com o instrumento da cor da primeira célula viva da linha.
+     * As notas do passo anterior são largadas aqui, por isso o som fica ligado, sem cortes secos.
      * Os tempos fortes (accent) tocam mais alto, o que dá ritmo à melodia.
      */
-    public void playColumn(CellularAutomata ca, int col, boolean accent) {
+    public void playBand(CellularAutomata ca, int colStart, int colEnd, boolean accent) {
         releaseMelody();
         if (channels == null || muted) {
             return;
         }
-        List<Integer> rows = new ArrayList<>();
+        List<int[]> candidates = new ArrayList<>(); // {linha, cor}
         for (int row = 0; row < ca.getNrows(); row++) {
-            if (ca.getCell(row, col).isAlive()) {
-                rows.add(row);
+            for (int col = colStart; col < colEnd; col++) {
+                Cell c = ca.getCell(row, col);
+                if (c.isAlive()) {
+                    candidates.add(new int[] { row, c.getColorIndex() });
+                    break;
+                }
             }
         }
-        int count = Math.min(MAX_NOTES, rows.size());
+        int count = Math.min(MAX_NOTES, candidates.size());
         int velocity = accent ? 90 : 65;
+        int lastNote = -1;
         for (int i = 0; i < count; i++) {
-            int row = rows.get(i * rows.size() / count);
-            int note = noteForRow(row, ca.getNrows());
-            int channel = ca.getCell(row, col).getColorIndex();
-            channels[channel].noteOn(note, velocity);
-            playing.add(new int[] { channel, note });
+            int[] cand = candidates.get(i * candidates.size() / count);
+            int note = noteForRow(cand[0], ca.getNrows());
+            if (note == lastNote) {
+                continue;
+            }
+            lastNote = note;
+            channels[cand[1]].noteOn(note, velocity);
+            playing.add(new int[] { cand[1], note });
         }
     }
 
@@ -98,7 +107,7 @@ public class LifeMusic {
         playing.clear();
     }
 
-    public void playChord(int generation) {
+    public void playChord(int bar) {
         if (channels == null) {
             return;
         }
@@ -106,7 +115,7 @@ public class LifeMusic {
         if (muted) {
             return;
         }
-        int i = generation % CHORD_ROOTS.length;
+        int i = bar % CHORD_ROOTS.length;
         for (int interval : CHORD_SHAPES[i]) {
             channels[PAD_CHANNEL].noteOn(CHORD_ROOTS[i] + interval, 50);
         }

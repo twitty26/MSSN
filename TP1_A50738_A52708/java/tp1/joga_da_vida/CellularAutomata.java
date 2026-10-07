@@ -3,26 +3,25 @@ package tp1.joga_da_vida;
 import processing.core.PApplet;
 
 /*
- * Grelha de células que ocupa a janela toda.
- * Vizinhança de Moore (8 vizinhas) e bordas ligadas: o que sai de um lado entra pelo outro.
- * Regra clássica do Jogo da Vida (23/3): uma célula viva sobrevive com 2 ou 3 vizinhas vivas,
- * uma célula morta nasce com exatamente 3 vizinhas vivas.
+ * Grelha de células quadradas que ocupa a janela toda.
+ * Vizinhança de Moore (8 vizinhas: horizontal, vertical e diagonal).
+ * O jogo passa-se num arranjo infinito, que o computador não consegue guardar. A aproximação habitual
+ * é ligar as bordas (toro): o que sai por um lado entra pelo lado oposto, por isso nenhuma célula
+ * está "na borda" e todas têm sempre 8 vizinhas.
  */
 public class CellularAutomata {
 
     private final int nrows;
     private final int ncols;
-    private final float cellWidth;
-    private final float cellHeight;
+    private final int cellSize;
     private final int[] palette;
     private final Cell[][] cells;
 
-    public CellularAutomata(PApplet p, int nrows, int ncols, int[] palette) {
-        this.nrows = nrows;
-        this.ncols = ncols;
+    public CellularAutomata(PApplet p, int cellSize, int[] palette) {
+        this.cellSize = cellSize;
         this.palette = palette;
-        cellWidth = (float) p.width / ncols;
-        cellHeight = (float) p.height / nrows;
+        nrows = p.height / cellSize;
+        ncols = p.width / cellSize;
         cells = new Cell[nrows][ncols];
         for (int i = 0; i < nrows; i++) {
             for (int j = 0; j < ncols; j++) {
@@ -52,10 +51,14 @@ public class CellularAutomata {
         }
     }
 
+    private boolean inside(int row, int col) {
+        return row >= 0 && row < nrows && col >= 0 && col < ncols;
+    }
+
     public void randomize(PApplet p, float density) {
         for (Cell[] row : cells) {
             for (Cell c : row) {
-                c.setState(p.random(1) < density, randomColor(p));
+                c.setState(p.random(1) < density, (int) p.random(palette.length));
             }
         }
     }
@@ -69,19 +72,40 @@ public class CellularAutomata {
     }
 
     /*
-     * Primeiro calcula-se o próximo estado de todas as células e só depois se atualizam,
-     * senão as primeiras células a mudar estragavam a contagem das seguintes.
+     * Pincel do rato: à volta de (x, y) dá vida a cerca de metade das células, todas com a mesma cor.
+     */
+    public void paint(PApplet p, float x, float y, int radius) {
+        int row = (int) (y / cellSize);
+        int col = (int) (x / cellSize);
+        int colorIndex = (int) p.random(palette.length);
+        for (int i = row - radius; i <= row + radius; i++) {
+            for (int j = col - radius; j <= col + radius; j++) {
+                if (inside(i, j) && p.random(1) < 0.5f) {
+                    cells[i][j].setState(true, colorIndex);
+                }
+            }
+        }
+    }
+
+    /*
+     * Regras do Jogo da Vida (23/3), aplicadas a todas as células ao mesmo tempo:
+     * 1. célula morta com exatamente 3 vizinhas vivas torna-se viva (nascimento);
+     * 2. célula viva com menos de 2 vizinhas vivas morre (isolamento);
+     * 3. célula viva com mais de 3 vizinhas vivas morre (superpopulação);
+     * 4. célula viva com 2 ou 3 vizinhas vivas continua viva.
+     * Para serem simultâneas, primeiro calcula-se o próximo estado de todas as células e só depois
+     * se atualizam; senão as primeiras células a mudar estragavam a contagem das seguintes.
      */
     public void step(PApplet p) {
         for (Cell[] row : cells) {
             for (Cell c : row) {
                 int n = c.countAliveNeighbors();
-                if (c.isAlive()) {
-                    c.setNext(n == 2 || n == 3, c.getColorIndex());
-                } else if (n == 3) {
+                if (!c.isAlive() && n == 3) {
                     c.setNext(true, c.dominantNeighborColor(p, palette.length));
-                } else {
+                } else if (c.isAlive() && (n < 2 || n > 3)) {
                     c.setNext(false, c.getColorIndex());
+                } else {
+                    c.setNext(c.isAlive(), c.getColorIndex());
                 }
             }
         }
@@ -92,31 +116,15 @@ public class CellularAutomata {
         }
     }
 
-    public void toggle(PApplet p, float x, float y) {
-        int row = (int) (y / cellHeight);
-        int col = (int) (x / cellWidth);
-        if (row < 0 || row >= nrows || col < 0 || col >= ncols) {
-            return;
-        }
-        Cell c = cells[row][col];
-        c.setState(!c.isAlive(), randomColor(p));
-    }
-
-    private int randomColor(PApplet p) {
-        return (int) p.random(palette.length);
-    }
-
     public void display(PApplet p) {
-        p.stroke(20);
+        p.noStroke();
         for (int i = 0; i < nrows; i++) {
             for (int j = 0; j < ncols; j++) {
                 Cell c = cells[i][j];
                 if (c.isAlive()) {
                     p.fill(palette[c.getColorIndex()]);
-                } else {
-                    p.fill(40);
+                    p.rect(j * cellSize, i * cellSize, cellSize, cellSize);
                 }
-                p.rect(j * cellWidth, i * cellHeight, cellWidth, cellHeight);
             }
         }
     }
@@ -131,9 +139,5 @@ public class CellularAutomata {
 
     public int getNcols() {
         return ncols;
-    }
-
-    public float getCellWidth() {
-        return cellWidth;
     }
 }

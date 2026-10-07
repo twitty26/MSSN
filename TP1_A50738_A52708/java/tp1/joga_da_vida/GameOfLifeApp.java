@@ -5,71 +5,95 @@ import setup.IProcessingApp;
 
 /*
  * Jogo da Vida (23/3) com cores (critério do nlife-color) e música generativa (ideia do PentatonicGameOfLife).
- * Um cursor percorre as colunas da esquerda para a direita e as células vivas da coluna tocam notas.
- * Quando o cursor chega ao fim, o autómato avança uma geração e muda o acorde de fundo.
  *
- * Rato: clicar liga/desliga uma célula.
- * Teclas: espaço pausa, r aleatório, c limpar, m som, + e - velocidade.
+ * Visual: fundo preto e células pequenas. No início cada célula viva recebe uma cor ao acaso; quando uma
+ * célula nasce herda a cor mais comum das vizinhas. Assim formam-se zonas de cor que lutam entre si.
+ *
+ * Música: um cursor percorre a janela em BAND_STEPS faixas verticais, ao seu próprio ritmo
+ * (independente da velocidade da simulação), e toca as células vivas de cada faixa.
+ *
+ * Rato: clicar pinta uma mancha de células vivas com uma cor ao acaso.
+ * Teclas: espaço pausa, r recomeçar aleatório, c limpar, m som, + e - velocidade da simulação.
  */
 public class GameOfLifeApp implements IProcessingApp {
 
-    private static final int NROWS = 24;
-    private static final int NCOLS = 32;
+    private static final int CELL_SIZE = 4;
     private static final float DENSITY = 0.25f;
-    private static final int BEAT = 4; // de 4 em 4 colunas há um tempo forte
+    private static final int BRUSH_RADIUS = 4;
+
+    private static final int BAND_STEPS = 16;
+    private static final int BEAT = 4; // de 4 em 4 faixas há um tempo forte
+    private static final float MUSIC_STEP_TIME = 0.15f;
 
     private CellularAutomata ca;
     private LifeMusic music;
-    private int cursor;
     private int generation;
-    private float stepTime = 0.15f;
-    private float timer;
+    private float generationTime = 0.05f;
+    private float simTimer;
+    private float musicTimer;
+    private int band;
+    private int bar;
     private boolean paused;
 
     @Override
     public void setup(PApplet p) {
         int[] palette = {
-                p.color(231, 76, 60),
-                p.color(46, 204, 113),
-                p.color(52, 152, 219),
-                p.color(241, 196, 15)
+                p.color(30, 60, 255),
+                p.color(0, 230, 0),
+                p.color(255, 230, 0),
+                p.color(255, 30, 30),
+                p.color(230, 120, 230)
         };
-        ca = new CellularAutomata(p, NROWS, NCOLS, palette);
-        ca.randomize(p, DENSITY);
+        ca = new CellularAutomata(p, CELL_SIZE, palette);
         music = new LifeMusic(palette.length);
+        restart(p);
+    }
+
+    private void restart(PApplet p) {
+        ca.randomize(p, DENSITY);
+        generation = 0;
     }
 
     @Override
     public void draw(PApplet p, float dt) {
+        dt = Math.min(dt, 0.25f);
         if (!paused) {
-            timer += Math.min(dt, 0.25f);
-            while (timer >= stepTime) {
-                timer -= stepTime;
-                tick(p);
+            simTimer += dt;
+            while (simTimer >= generationTime) {
+                simTimer -= generationTime;
+                ca.step(p);
+                generation++;
+            }
+            musicTimer += dt;
+            while (musicTimer >= MUSIC_STEP_TIME) {
+                musicTimer -= MUSIC_STEP_TIME;
+                playNextBand();
             }
         }
+        p.background(0);
         ca.display(p);
         drawCursor(p);
         drawInfo(p);
     }
 
-    private void tick(PApplet p) {
-        if (cursor == 0) {
-            music.playChord(generation);
+    private void playNextBand() {
+        if (band == 0) {
+            music.playChord(bar);
         }
-        music.playColumn(ca, cursor, cursor % BEAT == 0);
-        cursor++;
-        if (cursor == NCOLS) {
-            cursor = 0;
-            ca.step(p);
-            generation++;
+        int ncols = ca.getNcols();
+        music.playBand(ca, band * ncols / BAND_STEPS, (band + 1) * ncols / BAND_STEPS, band % BEAT == 0);
+        band++;
+        if (band == BAND_STEPS) {
+            band = 0;
+            bar++;
         }
     }
 
     private void drawCursor(PApplet p) {
+        float width = (float) p.width / BAND_STEPS;
         p.noStroke();
-        p.fill(255, 50);
-        p.rect(cursor * ca.getCellWidth(), 0, ca.getCellWidth(), p.height);
+        p.fill(255, 20);
+        p.rect(band * width, 0, width, p.height);
     }
 
     private void drawInfo(PApplet p) {
@@ -80,7 +104,7 @@ public class GameOfLifeApp implements IProcessingApp {
 
     @Override
     public void mousePressed(PApplet p) {
-        ca.toggle(p, p.mouseX, p.mouseY);
+        ca.paint(p, p.mouseX, p.mouseY, BRUSH_RADIUS);
     }
 
     @Override
@@ -90,11 +114,11 @@ public class GameOfLifeApp implements IProcessingApp {
                 paused = !paused;
                 music.stopAll();
             }
-            case 'r' -> ca.randomize(p, DENSITY);
+            case 'r' -> restart(p);
             case 'c' -> ca.clear();
             case 'm' -> music.toggleMute();
-            case '+' -> stepTime = Math.max(0.05f, stepTime * 0.8f);
-            case '-' -> stepTime = Math.min(1f, stepTime * 1.25f);
+            case '+' -> generationTime = Math.max(0.01f, generationTime * 0.8f);
+            case '-' -> generationTime = Math.min(1f, generationTime * 1.25f);
             default -> {
             }
         }
