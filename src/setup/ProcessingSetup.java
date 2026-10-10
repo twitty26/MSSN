@@ -1,8 +1,10 @@
 package setup;
 
 import processing.core.PApplet;
-import tp0.face.Face;
+//import tp0.face.Face;
 // import tp0.logo.Logo;
+// import tp1.jogo_da_vida.GameOfLifeApp;
+import tp1.dla.DLA;
 
 /*
  * Queres escrever mais classes que usem os métodos do Processing.
@@ -74,7 +76,13 @@ public class ProcessingSetup extends PApplet {
         // app = new Logo();
         // PApplet.main(ProcessingSetup.class);
 
-        app = new Face();
+        // app = new Face();
+        // PApplet.main(ProcessingSetup.class);
+
+        // app = new GameOfLifeApp();
+        // PApplet.main(ProcessingSetup.class);
+
+        app = new DLA();
         PApplet.main(ProcessingSetup.class);
     }
 }
