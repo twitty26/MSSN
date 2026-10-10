@@ -1,5 +1,5 @@
 INFORMAÇÃO SOBRE A PASTA "mssn" (Modelação e Simulação de Sistemas Naturais)
-Última atualização: 2026-09-20 (TP0/java preenchido; Logo e Face feitos)
+Última atualização: 2026-10-09 (settings.json reposto; TP1 em src/tp1 com Jogo da Vida e DLA)
 
 Ler também: claude/regras/regras.txt (regras a cumprir sempre) e CLAUDE.md (raiz).
 
@@ -7,33 +7,41 @@ Ler também: claude/regras/regras.txt (regras a cumprir sempre) e CLAUDE.md (rai
 1. ESTRUTURA GERAL
 =====================================================================
 mssn/                              <- pasta aberta no VS Code (workspace)
-├── CLAUDE.md                      -> na raiz (o utilizador moveu-o e voltou a pô-lo aqui); manda ler
-│                                     claude/regras/regras.txt e claude/info_mssn.txt. Só é lido
-│                                     automaticamente na raiz (ou em .claude/).
-├── data/                          -> vazia; criada conforme o guia de Setup (loadImage() procura aqui)
-├── .vscode/                       -> alinhado com o guia de Setup
+├── CLAUDE.md                      -> na raiz; manda ler claude/regras/regras.txt e claude/info_mssn.txt.
+│                                     Só é lido automaticamente na raiz (ou em .claude/).
+├── .gitignore                     -> criado pela Helena: ignora .vscode/* exceto settings, tasks, launch,
+│                                     extensions, *.code-snippets; ignora *.vsix
+├── .gitattributes                 -> text=auto (normalização LF)
+├── .vscode/
 │   ├── launch.json                -> 1 config "Correr simulação", mainClass setup.ProcessingSetup
-│   ├── settings.json              -> sourcePaths=["src"], referencedLibraries=["lib/core-4.5.6.jar"], outputPath=bin
+│   ├── settings.json              -> referencedLibraries=["lib/core-4.5.6.jar"], sourcePaths=["src"],
+│   │                                 outputPath=bin (reposto; difere do commitado só na formatação)
 │   └── tasks.json                 -> task "compilar" (PowerShell, recursivo: Get-ChildItem src -Recurse)
-├── bin/                           -> .class de src/ (versionado no git; VS Code compila para aqui)
+├── bin/                           -> .class de src/ (versionado no git; VS Code compila para aqui;
+│                                     também copia ficheiros não-java, ex: bin/tp1/dla/DLA_explicacao.md)
 ├── lib/core-4.5.6.jar             -> biblioteca Processing core
-├── src/                           -> código dos exercícios da UC (só se trabalha aqui, no TP0 e em claude/)
+├── Videos/                        -> 2 vídeos da aula (2-7-implementar-dla.mp4 58 MB, 2 9 Desafio DLA.mp4
+│                                     13 MB); untracked e NÃO ignorado -> não fazer git add . (ver secção 5)
+├── src/                           -> código dos exercícios da UC
 │   ├── setup/IProcessingApp.java  -> interface "contrato" (setup, draw, mousePressed, keyPressed)
-│   ├── setup/ProcessingSetup.java -> extends PApplet; settings() com size(800,600) e smooth(8);
-│   │                                 main(): app = new Face() ativo; Logo comentado (com o import comentado)
-│   ├── semana1_2/Hello.java, Hello2.java -> exemplos (círculo que segue o rato); Hello2 sem throw nos handlers
-│   ├── tp0/logo/Logo.java         -> TP0 pontos 1a-1d (ver secção 3)
-│   ├── tp0/face/Face.java         -> TP0 pontos 2 e 2a (ver secção 3)
+│   ├── setup/ProcessingSetup.java -> extends PApplet; size(800,600), smooth(8);
+│   │                                 main(): app = new DLA() ativo; Face, Logo, GameOfLifeApp comentados
+│   ├── semana1_2/Hello.java, Hello2.java -> exemplos (círculo que segue o rato)
+│   ├── tp0/logo/Logo.java, tp0/face/Face.java -> TP0 (ver secção 3)
+│   ├── tp1/celulas/               -> Cell, CellularAutomata (pacote tp1.celulas)
+│   ├── tp1/jogo_da_vida/          -> GameOfLifeApp, LifeMusic (pacote tp1.jogo_da_vida)
+│   ├── tp1/dla/                   -> Walker, DLA, DLA_explicacao.md (pacote tp1.dla) (ver secção 3C)
 │   ├── ca/ForestFireApp.java      -> esqueleto por implementar (UnsupportedOperationException)
 │   └── aa/ ca/ dynamics/ ecosystem/ physics/ tools/ *.txt -> ficheiros vazios (notas por escrever)
 ├── claude/
 │   ├── info_mssn.txt              -> este ficheiro
 │   └── regras/regras.txt          -> regras genéricas (G1-G7) e específicas (E1-E5)
-└── TP0_A50738_A52708/             -> Trabalho Prático 0 (A50738 e A52708), untracked
-    ├── doc/                       -> vazia (relatório por fazer)
-    ├── java/                      -> cópia de entrega: setup/ (IProcessingApp, ProcessingSetup) e
-    │                                 tp0/ (logo/Logo, face/Face); idêntica a src/setup + src/tp0
-    └── mod/                       -> vazia (modelos de suporte por fazer)
+├── TP0_A50738_A52708/java/        -> cópia de entrega do TP0: setup/ + tp0/ (idêntica a src/setup + src/tp0)
+└── TP1_A50738_A52708/java/        -> versão da Helena do Jogo da Vida (setup/ + tp1/joga_da_vida/).
+                                      NÃO se mexe diretamente (decisão do utilizador, 2026-10-07).
+
+Nota: data/, TP0/doc, TP0/mod, TP1/doc e TP1/mod não existem em disco (o git não guarda pastas
+vazias). Têm de ser criadas antes da entrega (regra E2: doc, java, mod).
 
 =====================================================================
 2. PADRÃO ARQUITETURAL
@@ -42,7 +50,8 @@ mssn/                              <- pasta aberta no VS Code (workspace)
 - Só uma classe estende PApplet (ProcessingSetup); cada simulação implementa IProcessingApp e
   recebe o PApplet por parâmetro. Para trocar de simulação, comentar/descomentar linhas
   app = new ...() em ProcessingSetup.main() (e o import correspondente).
-- O tempo é medido com dt em segundos (nunca por frames).
+- O tempo é medido com dt em segundos (nunca por frames): padrão timer += min(dt, 0.25);
+  while (timer >= STEP_TIME) passo(); usado no GameOfLifeApp e no DLA.
 
 =====================================================================
 3. TP0 (Projeto 0) - só Parte B feita
@@ -54,47 +63,102 @@ Decisões:
 - O jar não vai no zip de entrega. O zip leva só doc/, java/ e mod/.
 
 Implementado:
-- Logo.java: uma classe com 3 versões de draw(p, dt), só uma ativa de cada vez:
-  1b (ativa) logo novo de 2 em 2 s em posição aleatória; 1c (comentada) nasce na origem e desliza
-  com easing exponencial; 1d (comentada) o clique do rato define o destino. Logo VW desenhado com
-  triângulos e polígonos pretos + anel (formas extraídas da imagem de referência). O utilizador
-  já testou as variantes.
-- Face.java (2 e 2a): cara de elipse verde; cada pupila segue o rato (PVector.limit); rato perto
-  da cara -> surpreendida (boca aberta, sobrancelhas levantadas), longe -> sorriso.
-- ProcessingSetup: smooth(8) e app = new Face() ativo.
+- Logo.java: 3 versões de draw(p, dt), só uma ativa: 1b (ativa) logo novo de 2 em 2 s em posição
+  aleatória; 1c (comentada) nasce na origem e desliza com easing; 1d (comentada) clique define o
+  destino. Logo VW com triângulos/polígonos + anel. Testado pelo utilizador.
+- Face.java (2 e 2a): cara verde; pupilas seguem o rato (PVector.limit); rato perto -> surpreendida,
+  longe -> sorriso.
 
 Por fazer / em aberto:
-- Ponto 2b: o texto do enunciado perdeu-se (só aparece "b." ao lado da última linha de faces);
-  não presumir nada até haver o original.
+- Ponto 2b: texto do enunciado perdeu-se; não presumir nada até haver o original.
 - Parte A, relatório em doc/ e modelos em mod/.
 - Escolher que app fica ativa no ProcessingSetup antes da entrega e voltar a copiar.
 
 Histórico do problema de classpath (resolvido):
-- Ficheiros de TP0/java davam "not on the classpath" / "non-project file" porque o VS Code aberto
-  em mssn só lê mssn/.vscode. A tentativa com .project/.classpath (projeto Eclipse aninhado)
-  falhou (ficheiros foram parar a TP0/mod/) e foi abandonada. Solução: desenvolver em src/tp0/ e
-  copiar para TP0/java só na entrega.
+- Ficheiros de TP0/java davam "not on the classpath" porque o VS Code aberto em mssn só lê
+  mssn/.vscode. A tentativa com .project/.classpath falhou e foi abandonada. Solução: desenvolver em
+  src/tp0/ e copiar para TP0/java só na entrega.
 
 =====================================================================
-4. VERIFICAÇÃO CONTRA O GUIA "Setup - Java, Processing e VSCode"
+3B. TP1 - A. Jogo da Vida (feito pela Helena, PRs #3 e #4, 2026-10-07)
 =====================================================================
-- Conforme: jar core-4.5.6.jar, JDK 25 (>=17), settings.json, pacotes em src/ (setup, tools,
-  dynamics, physics, ca, aa, ecosystem + semana1_2 e tp0 extra).
-- Corrigido: taska.json -> tasks.json (VS Code só lê tasks.json) e compilação recursiva (o
-  guia usa src/*.java, que falha com pacotes); launch.json reduzido à config do guia com
-  setup.ProcessingSetup; Hello2 sem exceções nos handlers; criada data/.
+Onde: a Helena escreveu em TP1/java/tp1/joga_da_vida/. O utilizador copiou para src/tp1 e separou em
+dois pacotes: tp1.celulas (Cell, CellularAutomata) e tp1.jogo_da_vida (GameOfLifeApp, LifeMusic),
+com os imports entre pacotes. src/tp1 é agora a versão de trabalho (regra E3).
+
+Implementado:
+- Cell: estado + índice de cor; próximo estado à parte (atualização simultânea);
+  dominantNeighborColor() = regra nlife-color (cor mais comum das vizinhas vivas, empate ao acaso).
+- CellularAutomata: grelha que ocupa a janela; vizinhança de Moore em toro; regras B3/S23 em step();
+  randomize, clear, paint (pincel do rato), display.
+- GameOfLifeApp: 5 cores, densidade 0.25, gerações por tempo (dt); cursor musical de 16 faixas.
+  Rato pinta células. Teclas: espaço pausa, r recomeça, c limpa, m som, + / - velocidade.
+- LifeMusic: MIDI do Java (javax.sound.midi); linha = nota da pentatónica de dó, cor = instrumento;
+  pad de acordes dó-lá-fá-sol.
+
+Em aberto:
+- src/tp1 (celulas + jogo_da_vida) já difere de TP1/java (joga_da_vida). Na entrega, a cópia para
+  TP1/java deve sair de src/ (combinar com a Helena, que trabalha diretamente em TP1/java).
+- Faltam doc/ e mod/ do TP1.
+
+=====================================================================
+3C. TP1 - B. DLA (Diffusion-Limited Aggregation) (2026-10-09)
+=====================================================================
+Escrito de raiz por decisão do utilizador (não se extraiu código dos vídeos), seguindo a estrutura
+da aula vista no repositório público github.com/GuilhermeGraca/java-gol-dla-processing (TP1 de outros
+alunos): enum State {STOPPED, WANDER}, contadores static num_wanders/num_stopped, construtores
+Walker(p) e Walker(p, pos), setState/updateState/wander/display. Desse repositório usou-se só a
+estrutura; critério de cor, rato e ensaio deles não foram copiados (risco de plágio).
+
+Ficheiros (src/tp1/dla/):
+- Walker.java: RADIUS=2; nasce em posição aleatória da janela (não num círculo à volta do centro,
+  nem com lerp para o centro, porque com outras formas o agregado não está no centro);
+  setState trata contadores e cor; updateState pára com probabilidade stickiness ao tocar numa
+  parada (dist < 2*RADIUS); wander = passo PVector.random2D() com constrain à janela.
+- DLA.java: NUM_WALKERS=200 sempre em movimento (quando uma pára cria-se outra no mesmo passo, com
+  for por índice para evitar ConcurrentModificationException); tempo com dt (STEP_TIME=0.001 s);
+  colorMode HSB. Formas (enum Shape): 1 ponto no centro, 2 linha horizontal a meio (y = cy, pedido do
+  utilizador), 3 círculo r=200, 4 quadrado meio-lado 150; clique acrescenta sementes (GUI);
+  r recomeça; + / - stickiness (x2 / ÷2, entre 0.01 e 1). restart() põe os contadores static a 0.
+- DLA_explicacao.md: explicação simples do DLA, da matéria e do código (para estudar/defender).
+
+Enunciado (B): obrigatório feito (nº constante + critério de cor = ordem de paragem em HSB).
+Facultativos feitos: inicializações e stickiness. NÃO feitos (decisão do utilizador): grelha 2D e
+ensaio sobre o DLA.
+
+Em aberto:
+- Correr com stickiness 1 / 0.5 / 0.1 / 0.02, tirar prints e comentar no relatório.
+- Desempenho O(partículas em movimento x total) - fica lento com muitas paradas (a grelha resolveria).
+
+=====================================================================
+4. VERIFICAÇÃO
+=====================================================================
+- Conforme o guia "Setup - Java, Processing e VSCode": jar core-4.5.6.jar, JDK 25 (>=17),
+  pacotes em src/ (setup, tools, dynamics, physics, ca, aa, ecosystem + semana1_2, tp0, tp1 extra).
+- Correções antigas: taska.json -> tasks.json e compilação recursiva; launch.json reduzido.
 - Pastas de src/ não se removem (foram criadas de propósito para as semanas seguintes).
 - Nota: o guia diz que bin/ é gerado e "não se mexe"; aqui está versionado no git.
 - Nota: ForestFireApp ainda é esqueleto (lança exceção no setup); não o usar em main() até implementar.
-- Verificado (2026-09-20): src/ completo e TP0/java (sozinho) compilam sem erros nem avisos.
+- Verificado (2026-10-09, javac -Xlint em pasta temporária): src/ inteiro compila sem erros nem
+  avisos. O utilizador testou o DLA no VS Code e diz estar tudo ok.
+
+Histórico do settings.json (resolvido 2026-10-07):
+- Tinha sido acrescentado "TP1_A50738_A52708/java/setup" ao sourcePaths. Raiz errada (devia ser
+  .../java): gerava bin/IProcessingApp.class e bin/ProcessingSetup.class sem pacote; e mesmo com a raiz
+  certa src/setup e TP1/java/setup declaram as mesmas classes (conflito). Decisão: sourcePaths=["src"]
+  (original dos professores, regra E4) e trabalhar o TP1 em src/tp1. Os .class sem pacote já não existem.
 
 =====================================================================
 5. ESTADO DO GIT (branch Tiago)
 =====================================================================
-- Modificados: .vscode/launch.json, src/semana1_2/Hello2.java, src/setup/ProcessingSetup.java,
-  bin/semana1_2/Hello2.class, bin/setup/ProcessingSetup.class; .vscode/taska.json removido.
-- Untracked: .vscode/tasks.json, CLAUDE.md, claude/, src/tp0/, bin/tp0/, TP0_A50738_A52708/
-- doc/, mod/ e data/ estão vazias, por isso o git não as mostra.
+- Branches: main, Tiago, Helena (remoto twitty26). Histórico:
+  PR #1 (Tiago) TP0 alínea B -> main; PR #2 (Helena) .gitignore; PR #3 e #4 (Helena) Jogo da Vida.
+- Modificados por commitar: .vscode/settings.json (só formatação), src/setup/ProcessingSetup.java,
+  bin/setup/ProcessingSetup.class, claude/info_mssn.txt.
+- Untracked: src/tp1/, bin/tp1/, Videos/.
+- ATENÇÃO: Videos/ (~70 MB) não está no .gitignore; um git add . sobe-o para o GitHub (>50 MB dá aviso,
+  >100 MB é recusado). Sugerido: mover para fora de mssn ou acrescentar Videos/ ao .gitignore
+  (por decidir pelo utilizador).
 - Nada commitado por mim: os commits são sempre feitos pelo utilizador (regra G4).
 
 =====================================================================
@@ -103,4 +167,8 @@ Histórico do problema de classpath (resolvido):
 - Estrutura de entrega dos professores: doc / java / mod (ver regras E2).
 - Temas por semana: semana1_2 introdução; dynamics 3-5; ca 6-7; aa 8-9; ecosystem 10-13;
   physics/tools transversais.
+- Trabalho a dois: Tiago (T4R423) e Helena (twitty26); a Helena trabalha diretamente nas pastas TP.
+- Vídeos YouTube da aula têm legendas automáticas em PT, mas o download direto dá 404 (token do
+  YouTube); alternativas: yt-dlp (por instalar) ou copiar a transcrição à mão. Artigos web sobre AC,
+  Jogo da Vida, DLA (Paul Bourke) e arte generativa já foram resumidos na conversa de 2026-10-08.
 - Atualizar este ficheiro sempre que houver alterações relevantes ou decisões (regras E1, G6).
