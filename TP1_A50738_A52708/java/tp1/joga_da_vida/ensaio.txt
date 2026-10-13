@@ -1,0 +1,10 @@
+O jogo da vida é um autômato celular criado em 1970 pelo matemático britânico John Horton Conway, é um jogo sem jogadores, o que 
+significa que o seu rumo é determinado apenas pela configuração inicial, sem necessidade de intervenção humana durante a execução.
+Joga-se em uma grade bidimensional, que pode ser teoricamente infinita. Cada célula da grade encontra-se em um de dois estados,
+viva (preenchida) ou morta(vazia).
+A cada nova geração, o estado de cada célula é recalculado simultaneamente com base nas suas oito células vizinhas:
+ 1. Sobrevivência: Uma célula viva com 2 ou 3 vizinhos vivos continua viva para a geração seguinte.
+ 2. Morte por solidão: Uma célula viva com menos de 2 vizinhos vivos morre.
+ 3. Morte por superpopulação: Uma célula viva com mais de 3 vizinhos vivos morre.
+ 4. Nascimento: Uma célula morta com exatamente 3 vizinhos torna-se uma célula viva.
+ A partir destas regras simples, surgem comportamentos complexos, padrões cícliocos, estruturas estáticas e formas que parecem andar.
