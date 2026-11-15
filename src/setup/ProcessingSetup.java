@@ -4,7 +4,11 @@ import processing.core.PApplet;
 //import tp0.face.Face;
 // import tp0.logo.Logo;
 // import tp1.jogo_da_vida.GameOfLifeApp;
-import tp1.dla.DLA;
+// import tp1.dla.DLA;
+// import tp2.sistema_solar.SistemaSolarApp;
+// import tp2.comportamentos.ComportamentosApp;
+// import tp2.flocking.FlockingApp;
+import tp2.flocking.EcossistemaApp;
 
 /*
  * Queres escrever mais classes que usem os métodos do Processing.
@@ -82,7 +86,19 @@ public class ProcessingSetup extends PApplet {
         // app = new GameOfLifeApp();
         // PApplet.main(ProcessingSetup.class);
 
-        app = new DLA();
+        // app = new DLA();
+        // PApplet.main(ProcessingSetup.class);
+
+        // app = new SistemaSolarApp();
+        // PApplet.main(ProcessingSetup.class);
+
+        // app = new ComportamentosApp();
+        // PApplet.main(ProcessingSetup.class);
+
+        // app = new FlockingApp();
+        // PApplet.main(ProcessingSetup.class);
+
+        app = new EcossistemaApp();
         PApplet.main(ProcessingSetup.class);
     }
 }

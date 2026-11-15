@@ -1,5 +1,6 @@
 INFORMAÇÃO SOBRE A PASTA "mssn" (Modelação e Simulação de Sistemas Naturais)
-Última atualização: 2026-10-09 (settings.json reposto; TP1 em src/tp1 com Jogo da Vida e DLA)
+Última atualização: 2026-11-14 (TP2: src/tp2 com B, C, D, E feitos; pasta de entrega TP2_A50738_A52708;
+relatório em src/tp2/doc/Relatorio_TP2.md; ver secção 3D)
 
 Ler também: claude/regras/regras.txt (regras a cumprir sempre) e CLAUDE.md (raiz).
 
@@ -20,25 +21,34 @@ mssn/                              <- pasta aberta no VS Code (workspace)
 ├── bin/                           -> .class de src/ (versionado no git; VS Code compila para aqui;
 │                                     também copia ficheiros não-java, ex: bin/tp1/dla/DLA_explicacao.md)
 ├── lib/core-4.5.6.jar             -> biblioteca Processing core
-├── Videos/                        -> 2 vídeos da aula (2-7-implementar-dla.mp4 58 MB, 2 9 Desafio DLA.mp4
-│                                     13 MB); untracked e NÃO ignorado -> não fazer git add . (ver secção 5)
 ├── src/                           -> código dos exercícios da UC
 │   ├── setup/IProcessingApp.java  -> interface "contrato" (setup, draw, mousePressed, keyPressed)
 │   ├── setup/ProcessingSetup.java -> extends PApplet; size(800,600), smooth(8);
-│   │                                 main(): app = new DLA() ativo; Face, Logo, GameOfLifeApp comentados
+│   │                                 main(): app = new EcossistemaApp() ativo; os outros comentados
 │   ├── semana1_2/Hello.java, Hello2.java -> exemplos (círculo que segue o rato)
 │   ├── tp0/logo/Logo.java, tp0/face/Face.java -> TP0 (ver secção 3)
 │   ├── tp1/celulas/               -> Cell, CellularAutomata (pacote tp1.celulas)
 │   ├── tp1/jogo_da_vida/          -> GameOfLifeApp, LifeMusic (pacote tp1.jogo_da_vida)
 │   ├── tp1/dla/                   -> Walker, DLA, DLA_explicacao.md (pacote tp1.dla) (ver secção 3C)
-│   ├── ca/ForestFireApp.java      -> esqueleto por implementar (UnsupportedOperationException)
-│   └── aa/ ca/ dynamics/ ecosystem/ physics/ tools/ *.txt -> ficheiros vazios (notas por escrever)
+│   ├── tp2/                       -> TP2 (ver secção 3D): fisica, sistema_solar, agentes,
+│   │                                 comportamentos, flocking, doc/Relatorio_TP2.md
+│   └── ca/ForestFireApp.java      -> esqueleto por implementar (UnsupportedOperationException)
+│   (as pastas aa/ dynamics/ ecosystem/ physics/ tools/ com .txt vazios foram apagadas pelo utilizador;
+│    Videos/ também foi removida)
 ├── claude/
 │   ├── info_mssn.txt              -> este ficheiro
 │   └── regras/regras.txt          -> regras genéricas (G1-G7) e específicas (E1-E5)
 ├── TP0_A50738_A52708/java/        -> cópia de entrega do TP0: setup/ + tp0/ (idêntica a src/setup + src/tp0)
-└── TP1_A50738_A52708/java/        -> versão da Helena do Jogo da Vida (setup/ + tp1/joga_da_vida/).
-                                      NÃO se mexe diretamente (decisão do utilizador, 2026-10-07).
+├── TP1_A50738_A52708/java/        -> versão da Helena do Jogo da Vida (setup/ + tp1/joga_da_vida/).
+│                                     NÃO se mexe diretamente (decisão do utilizador, 2026-10-07).
+└── TP2_A50738_A52708/             -> entrega do TP2: doc/ (vazia, falta o PDF), java/ (= src/setup +
+                                      src/tp2 sem doc/; ProcessingSetup com SistemaSolarApp ativo),
+                                      mod/Queda_Livre_Atrito.png. Untracked. Antes chamava-se
+                                      TP2_A52708_A52738 (renomeada pelo utilizador).
+
+REGRA DO UTILIZADOR (2026-11): só altero ficheiros dentro de src/ (e claude/). As pastas de entrega
+(TP0_, TP1_, TP2_...) são só para LEITURA/verificação; quem copia para lá é o utilizador (exceção
+pontual: o utilizador pediu-me para copiar src/tp2/flocking para TP2_A50738_A52708/java/tp2).
 
 Nota: data/, TP0/doc, TP0/mod, TP1/doc e TP1/mod não existem em disco (o git não guarda pastas
 vazias). Têm de ser criadas antes da entrega (regra E2: doc, java, mod).
@@ -131,6 +141,49 @@ Em aberto:
 - Desempenho O(partículas em movimento x total) - fica lento com muitas paradas (a grelha resolveria).
 
 =====================================================================
+3D. TP2 (Projeto 2) - feitos B, C, D e E (2026-11; prazo 15-11-2026 23:59)
+=====================================================================
+Enunciados oficiais (A a G) guardados na memória do Claude (enunciados-tp2). Moodle deste ano pede
+(A ou B) + C + D + E; a página de 2021 dizia D e E "escolher 2 em 5". Fizeram-se todos os pontos.
+
+B. Queda livre com atrito - Sheetless (não é código). Print em TP2/mod/Queda_Livre_Atrito.png (caso
+   da água). Valores que calculei (o utilizador tem de confirmar no Sheetless): 70 kg no ar ≈ 25 s e
+   46 m/s (vácuo 14,3 s / 140 m/s); paraquedas aos 300 m, 80 kg, área ≈ 28 m² -> ≈ 62 s e 6,6 m/s;
+   água: força ≈ 530 000 N, submerge a ≈ 1,65 m/s. Ar: D = 1,29 kg/m³, C = 1.
+
+C. src/tp2/fisica (Body, Particle, ParticleSystem com rate e burst) + sistema_solar/SistemaSolarApp.
+   Euler semi-implícito, passo fixo 0,002 s; G = 1, Sol 2e6. Teclas: 1 um planeta (C.1), 2 cinco
+   planetas só atraídos pelo Sol (C.2a), 3 todos se atraem, planetas 2e4, Sol com momento anulado
+   (C.2b); espaço pausa; clique cria planeta. Partículas (C.3): coroa do Sol e cauda do cometa
+   (modos 2 e 3). Sem rasto das órbitas.
+
+D. src/tp2/agentes (Behavior, Boid, Eye, Seek, Flee, Arrive, Patrol, Wander) + comportamentos/
+   ComportamentosApp, teclas 1-5: 1 seek ao rato (b travão, +/- vmax, f/v força); 2 arrive (clique
+   alvo, +/- k, R = 150); 3 patrol (cliques gravam, p usa definePath, x apaga); 4 wander Reynolds;
+   5 comutação wander/flee com inimigo controlado pelo rato (duas distâncias, histerese).
+
+E. src/tp2/flocking (tudo escrito por mim, passo a passo com explicações, a pedido do utilizador):
+   - Alteração em Boid.applyBehaviors: comportamento que devolve null é ignorado (não entra na média);
+     comentário correspondente em Behavior.
+   - Separate, Align, Cohesion, Pursuit (lookAhead), Evade (lista de ameaças, panicRadius).
+   - Flock (final): MAX_SPEED 120, VISION 70 px / 3π/4, SEPARATION 25; update em 2 voltas (todos
+     olham, depois todos se mexem); nearest(pos, maxDist).
+   - FlockingApp, teclas 1-4 (+ r): 1 predador persegue a presa mais próxima (E.1); 2 Boids
+     explosivos com timer 3-20 s, avermelham nos últimos 3 s, clique rebenta, ParticleSystem.burst
+     (E.2); 3 líder controlado com WASD, seguidores com Arrive (E.3); 4 debugging: Boid verde com
+     Eye.display, vizinhos amarelos, clique escolhe (E.4).
+   - EcossistemaApp + Predator (E.5): presas reproduzem-se e fogem; predadores com energia, comem,
+     dividem-se e morrem. Resultado: colapso (overshoot) sempre. O utilizador decidiu deixar assim
+     ("não vale a pena alterar mais") e comentar o colapso no relatório.
+
+Relatório: src/tp2/doc/Relatorio_TP2.md (pergunta oficial + resposta curta + bloco [Print] com
+"Como tirar"). O utilizador tira os prints, apaga os "Como tirar", exporta para PDF e põe em
+TP2/doc. O documento antigo no Claude Docs foi abandonado.
+
+Por fazer (utilizador): prints e PDF em doc/; confirmar valores do B; zip TP2_A50738_A52708.zip só com
+doc/, java/, mod/; escolher que app fica ativa no ProcessingSetup da entrega.
+
+=====================================================================
 4. VERIFICAÇÃO
 =====================================================================
 - Conforme o guia "Setup - Java, Processing e VSCode": jar core-4.5.6.jar, JDK 25 (>=17),
@@ -141,6 +194,9 @@ Em aberto:
 - Nota: ForestFireApp ainda é esqueleto (lança exceção no setup); não o usar em main() até implementar.
 - Verificado (2026-10-09, javac -Xlint em pasta temporária): src/ inteiro compila sem erros nem
   avisos. O utilizador testou o DLA no VS Code e diz estar tudo ok.
+- Verificado (2026-11, javac -Xlint): src/ com tp2 compila sem avisos; TP2_A50738_A52708/java compila
+  sozinho (só com o jar). Comando: javac -Xlint -encoding UTF-8 -cp lib/core-4.5.6.jar -d <temp>
+  $(find src -name '*.java').
 
 Histórico do settings.json (resolvido 2026-10-07):
 - Tinha sido acrescentado "TP1_A50738_A52708/java/setup" ao sourcePaths. Raiz errada (devia ser
@@ -152,13 +208,13 @@ Histórico do settings.json (resolvido 2026-10-07):
 5. ESTADO DO GIT (branch Tiago)
 =====================================================================
 - Branches: main, Tiago, Helena (remoto twitty26). Histórico:
-  PR #1 (Tiago) TP0 alínea B -> main; PR #2 (Helena) .gitignore; PR #3 e #4 (Helena) Jogo da Vida.
-- Modificados por commitar: .vscode/settings.json (só formatação), src/setup/ProcessingSetup.java,
-  bin/setup/ProcessingSetup.class, claude/info_mssn.txt.
-- Untracked: src/tp1/, bin/tp1/, Videos/.
-- ATENÇÃO: Videos/ (~70 MB) não está no .gitignore; um git add . sobe-o para o GitHub (>50 MB dá aviso,
-  >100 MB é recusado). Sugerido: mover para fora de mssn ou acrescentar Videos/ ao .gitignore
-  (por decidir pelo utilizador).
+  PR #1 (Tiago) TP0 alínea B -> main; PR #2 (Helena) .gitignore; PR #3 e #4 (Helena) Jogo da Vida;
+  ... PR #8 e #9 (Helena/main) TP2 inicial. A branch Tiago foi atualizada com a main via PR #9.
+- Estado em 2026-11-14 (por commitar): apagados TP2_A52708_A52738/ (renomeada), Videos/, os .txt
+  vazios de src/ e bin/; modificado src/setup/ProcessingSetup.java; untracked TP2_A50738_A52708/,
+  src/tp2/, bin/tp2/.
+- ATENÇÃO: mudar de branch com alterações por commitar já fez perder trabalho uma vez (TP2 e este
+  ficheiro); commitar ou fazer stash antes de trocar de branch.
 - Nada commitado por mim: os commits são sempre feitos pelo utilizador (regra G4).
 
 =====================================================================
